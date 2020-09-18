@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=2]
+[gd_scene load_steps=41 format=2]
 
 [ext_resource path="res://Player/zoro2.png" type="Texture" id=1]
 [ext_resource path="res://Player/Player.gd" type="Script" id=2]
@@ -350,23 +350,23 @@ blend_point_0/pos = -0.1
 blend_point_1/node = SubResource( 39 )
 blend_point_1/pos = 0.1
 
-[sub_resource type="AnimationNodeAnimation" id=18]
+[sub_resource type="AnimationNodeAnimation" id=42]
 animation = "MoveLeft"
 
-[sub_resource type="AnimationNodeAnimation" id=19]
+[sub_resource type="AnimationNodeAnimation" id=43]
 animation = "MoveRight"
 
-[sub_resource type="AnimationNodeBlendSpace1D" id=20]
-blend_point_0/node = SubResource( 18 )
-blend_point_0/pos = -0.05
-blend_point_1/node = SubResource( 19 )
-blend_point_1/pos = 0.05
-min_space = -1.1
-max_space = 1.1
+[sub_resource type="AnimationNodeAnimation" id=44]
+animation = "IdleLeft"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id=21]
-
-[sub_resource type="AnimationNodeStateMachineTransition" id=22]
+[sub_resource type="AnimationNodeBlendSpace2D" id=45]
+blend_point_0/node = SubResource( 42 )
+blend_point_0/pos = Vector2( -1, 0 )
+blend_point_1/node = SubResource( 43 )
+blend_point_1/pos = Vector2( 1, 0 )
+blend_point_2/node = SubResource( 44 )
+blend_point_2/pos = Vector2( 0, 1 )
+blend_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id=24]
 
@@ -380,6 +380,10 @@ auto_advance = true
 
 [sub_resource type="AnimationNodeStateMachineTransition" id=41]
 
+[sub_resource type="AnimationNodeStateMachineTransition" id=46]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=47]
+
 [sub_resource type="AnimationNodeStateMachine" id=29]
 states/Boosting/node = SubResource( 35 )
 states/Boosting/position = Vector2( -865.19, 37 )
@@ -389,11 +393,11 @@ states/Idle/node = SubResource( 16 )
 states/Idle/position = Vector2( -974, 145 )
 states/Landing/node = SubResource( 17 )
 states/Landing/position = Vector2( -1165.19, 145 )
-states/Moving/node = SubResource( 20 )
-states/Moving/position = Vector2( -712, 145 )
-transitions = [ "Idle", "Moving", SubResource( 21 ), "Moving", "Idle", SubResource( 22 ), "Falling", "Landing", SubResource( 24 ), "Landing", "Idle", SubResource( 25 ), "Idle", "Falling", SubResource( 28 ), "Idle", "Boosting", SubResource( 40 ), "Boosting", "Falling", SubResource( 41 ) ]
+states/Moving/node = SubResource( 45 )
+states/Moving/position = Vector2( -974, 279 )
+transitions = [ "Falling", "Landing", SubResource( 24 ), "Landing", "Idle", SubResource( 25 ), "Idle", "Falling", SubResource( 28 ), "Idle", "Boosting", SubResource( 40 ), "Boosting", "Falling", SubResource( 41 ), "Idle", "Moving", SubResource( 46 ), "Moving", "Idle", SubResource( 47 ) ]
 start_node = "Idle"
-graph_offset = Vector2( -1859.19, 0 )
+graph_offset = Vector2( -1880.19, 50 )
 
 [sub_resource type="AnimationNodeStateMachinePlayback" id=30]
 
@@ -404,7 +408,6 @@ script = ExtResource( 2 )
 [node name="Sprite" type="Sprite" parent="."]
 texture = ExtResource( 1 )
 vframes = 27
-frame = 13
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2( -1, 2 )
@@ -427,7 +430,6 @@ anims/MoveRight = SubResource( 11 )
 [node name="AnimationTree" type="AnimationTree" parent="."]
 tree_root = SubResource( 29 )
 anim_player = NodePath("../AnimationPlayer")
-active = true
 parameters/playback = SubResource( 30 )
 parameters/Boosting/blend_position = Vector2( 0, 0 )
 parameters/Falling/blend_position = 0

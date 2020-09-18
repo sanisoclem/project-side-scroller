@@ -40,6 +40,7 @@ onready var animationTree = $AnimationTree
 onready var animationState = animationTree.get("parameters/playback");
 
 signal status_changed(status)
+signal direction_changed(direction)
 
 func _ready() -> void:
 	animationTree.active = true
@@ -86,14 +87,24 @@ func apply_cmd(delta, cmd, input, current_state):
 			if state.state != PlayerStatus.Boost && new_state.last_floor < 10:
 				new_state.velocity.y = -BOOST_FORCE
 				new_state.state = PlayerStatus.Boost
+			else: 
+				continue
 		PlayerCommand.None:
 			# allow input to influence velocity --if not boosting and not falling
 			if input != Vector2.ZERO:
-				if input.x * new_state.velocity.x < 0:
+				# use friction if input is against current velocity
+				if input.x * current_state.velocity.x < 0:
 					new_state.velocity = current_state.velocity.move_toward(input * MAX_SPEED, FRICTION * delta)
+				# use acceleration if input is in the same direction as current velocity
 				else:
 					new_state.velocity = current_state.velocity.move_toward(input * MAX_SPEED, ACCELERATION * delta)
-				new_state.direction = new_state.velocity.x
+					
+				# compute new direction
+				new_state.direction = Vector2(new_state.velocity.x, 0).normalized().x
+				
+				# check if direction has changed and emit signal
+				if new_state.direction * current_state.direction < 0:
+					emit_signal("direction_changed", new_state.direction)
 			# dampen velocity
 			else:
 				new_state.velocity = current_state.velocity.move_toward(Vector2(0.0, current_state.velocity.y), FRICTION * delta)
@@ -110,7 +121,7 @@ func update_animation():
 			pass
 		PlayerStatus.Boost:
 			emit_signal("status_changed", "Boosting")
-			animationTree.set("parameters/Boosting/blend_position", state.direction)
+			update_direction("Boosting")
 			animationState.travel("Boosting")
 		PlayerStatus.Idle:
 			var animation = "Idle"
@@ -119,11 +130,15 @@ func update_animation():
 			elif abs(state.velocity.x) > 0:
 				animation = "Moving"
 			emit_signal("status_changed", animation)
-			animationTree.set("parameters/Landing/blend_position", state.direction)
-			animationTree.set("parameters/%s/blend_position" % animation, state.direction)
+			update_direction(animation)
 			animationState.travel(animation)
 				
-		
+func update_direction(animation):
+	animationTree.set("parameters/Landing/blend_position", state.direction)
+	if animation == "Moving":
+		animationTree.set("parameters/%s/blend_position" % animation, Vector2(state.direction,0.0))
+	else:
+		animationTree.set("parameters/%s/blend_position" % animation, state.direction)
 #	match state:
 #		MOVING:
 #			move_process(cmd, delta, input)
