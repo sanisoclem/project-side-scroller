@@ -20,16 +20,16 @@ jobs:
           godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.2.3/Godot_v3.2.3-stable_export_templates.tpz
           relative_project_path: src
           create_release: false
-          use_preset_export_path: true
+          use_preset_export_path:
       - name: S3 Sync
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
-          args: --acl public-read --follow-symlinks --delete
+          args: --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: 'ap-southeast-2'
-          SOURCE_DIR: 'dist'
-          DEST_DIR: 'psc'
+          AWS_REGION: ap-southeast-2
+          #SOURCE_DIR: dist
+          DEST_DIR: temp
 
