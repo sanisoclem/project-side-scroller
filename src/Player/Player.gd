@@ -24,11 +24,13 @@ class PlayerState:
 	var velocity = Vector2.ZERO
 	var state = PlayerStatus.Idle
 	var direction = 1.0
+	var last_floor = -1.0
 	func clone():
 		var retval = PlayerState.new()
 		retval.velocity = self.velocity
 		retval.state = self.state
 		retval.direction = self.direction
+		retval.last_floor = self.last_floor
 		return retval
 
 var state = PlayerState.new()
@@ -36,6 +38,8 @@ var cmd_queue = []
 
 onready var animationTree = $AnimationTree
 onready var animationState = animationTree.get("parameters/playback");
+
+signal status_changed(status)
 
 func _ready() -> void:
 	animationTree.active = true
@@ -49,23 +53,22 @@ func get_input_vector():
 	
 func get_command():
 	if Input.is_action_just_pressed("ui_accept"):
-		cmd_queue.push_back(PlayerCommand.Attack)
+		return PlayerCommand.Attack
 	elif Input.is_action_just_pressed("ui_cancel"):
-		cmd_queue.push_back(PlayerCommand.Boost)
+		return PlayerCommand.Boost
+	elif cmd_queue.size() > 0:
+		return cmd_queue.pop_front()
 	else:
-		cmd_queue.push_back(PlayerCommand.None)
-	return cmd_queue
+		return PlayerCommand.None
 	
 func _physics_process(delta):
 	# Get all inputs
 	var input = get_input_vector()
-	var cmds = get_command();
+	var cmd = get_command();
 	
 	# compute changes to state
-	while cmds.size() > 0:
-		var cmd = cmds.pop_front()
-		state = apply_cmd(delta, cmd, input, state)
-	
+	state = apply_cmd(delta, cmd, input, state)
+		
 	# apply new state
 	state.velocity = move_and_slide(state.velocity, Vector2(0, -1))
 	update_animation()
@@ -75,13 +78,14 @@ func queue_cmd(cmd):
 
 func apply_cmd(delta, cmd, input, current_state):
 	var new_state = current_state.clone()
+	new_state.last_floor = new_state.last_floor + 1 if !is_on_floor() else 0
 	match cmd:
 		PlayerCommand.Attack: 
 			pass
 		PlayerCommand.Boost:
-			if state.state != PlayerStatus.Boost && is_on_floor():
+			if state.state != PlayerStatus.Boost && new_state.last_floor < 10:
 				new_state.velocity.y = -BOOST_FORCE
-				state = PlayerStatus.Boost
+				new_state.state = PlayerStatus.Boost
 		PlayerCommand.None:
 			# allow input to influence velocity --if not boosting and not falling
 			if input != Vector2.ZERO:
@@ -95,7 +99,7 @@ func apply_cmd(delta, cmd, input, current_state):
 				new_state.velocity = current_state.velocity.move_toward(Vector2(0.0, current_state.velocity.y), FRICTION * delta)
 				
 			# deactivate boost if player is falling
-			if new_state.state == PlayerStatus.Boost && (new_state.velocity.y > 0 || is_on_wall() || is_on_ceiling()):
+			if new_state.state == PlayerStatus.Boost && (new_state.velocity.y > 0):
 				new_state.state = PlayerStatus.Idle
 			new_state.velocity = new_state.velocity + GRAVITY
 	return new_state
@@ -105,13 +109,17 @@ func update_animation():
 		PlayerStatus.Attack:
 			pass
 		PlayerStatus.Boost:
+			emit_signal("status_changed", "Boosting")
+			animationTree.set("parameters/Boosting/blend_position", state.direction)
 			animationState.travel("Boosting")
 		PlayerStatus.Idle:
 			var animation = "Idle"
-			if !is_on_floor():
+			if !is_on_floor() && state.velocity.y > 0:
 				animation = "Falling"
 			elif abs(state.velocity.x) > 0:
 				animation = "Moving"
+			emit_signal("status_changed", animation)
+			animationTree.set("parameters/Landing/blend_position", state.direction)
 			animationTree.set("parameters/%s/blend_position" % animation, state.direction)
 			animationState.travel(animation)
 				
