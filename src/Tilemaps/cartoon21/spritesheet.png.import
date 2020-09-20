@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/zoro.png-48f26d5264d02a37d2d894e713c397c5.stex"
+path="res://.import/spritesheet.png-874dbbedff58274e3595c89da529d488.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Player/zoro.png"
-dest_files=[ "res://.import/zoro.png-48f26d5264d02a37d2d894e713c397c5.stex" ]
+source_file="res://Tilemaps/cartoon21/spritesheet.png"
+dest_files=[ "res://.import/spritesheet.png-874dbbedff58274e3595c89da529d488.stex" ]
 
 [params]
 

@@ -1,11 +1,11 @@
 extends KinematicBody2D
 
-const MAX_SPEED = 500.0
-const ACCELERATION = 1000.0
-const FRICTION = 10000.0
-const BOOST_FORCE = 1000
-const GRAVITY = Vector2(0, 50)
-const TERMINAL_VELOCITY = 10000.0
+export var MAX_SPEED = 500.0
+export var ACCELERATION = 1000.0
+export var FRICTION = 10000.0
+export var BOOST_FORCE = 1000
+export var GRAVITY = Vector2(0, 50)
+export var TERMINAL_VELOCITY = 10000.0
 
 enum PlayerCommand {
 	Boost,
@@ -75,7 +75,7 @@ func _physics_process(delta):
 	update_animation()
 
 func queue_cmd(cmd): 
-	pass
+	cmd_queue.push_back(cmd)
 
 func apply_cmd(delta, cmd, input, current_state):
 	var new_state = current_state.clone()
@@ -139,46 +139,3 @@ func update_direction(animation):
 		animationTree.set("parameters/%s/blend_position" % animation, Vector2(state.direction,0.0))
 	else:
 		animationTree.set("parameters/%s/blend_position" % animation, state.direction)
-#	match state:
-#		MOVING:
-#			move_process(cmd, delta, input)
-#		ATTACKING:
-#			attack_process(cmd, delta, input)
-#		DASHING:
-#			dash_process(cmd, delta, input)
-#		FALLING:
-#			fall_process(cmd, delta, input)
-#		IDLE:
-#			idle_process(cmd, delta, input)
-#
-#	if state != ATTACK && Input.is_action_just_pressed("ui_accept"):
-#		if input != Vector2.ZERO:
-#			pass #animationTree.set("parameters/Attack/blend_position", input)
-#		velocity = Vector2.ZERO
-#		state = ATTACK
-#
-#	velocity = move_and_slide(velocity + GRAVITY)
-#
-#	if state != ROLL && Input.is_action_just_pressed("ui_cancel") && input.length() > 0:
-#		pass #animationTree.set("parameters/Roll/blend_position", input)
-#		velocity = input * MAX_SPEED * ROLL_MULTIPLIER
-#		state = ROLL
-#
-#func idle_process(cmd, delta, input):
-#	state = IDLE
-#func attack_state(cmd, delta, input):
-#	state = IDLE
-#
-#func roll_state(cmd, delta, input):
-#	pass
-#
-#func move_state(cmd, delta, input):
-#	if input != Vector2.ZERO:
-#		animationTree.set("parameters/Idle/blend_position", input.x)
-#		animationTree.set("parameters/Moving/blend_position", input.x)
-#		#animationTree.set("parameters/Attack/blend_position", input)
-#		animationState.travel("Moving")
-#		velocity = velocity.move_toward(input * MAX_SPEED, ACCELERATION * delta)
-#	else:
-#		animationState.travel("Idle")
-#		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
