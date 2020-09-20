@@ -110,7 +110,7 @@ func apply_cmd(delta, cmd, input, current_state):
 				new_state.velocity = current_state.velocity.move_toward(Vector2(0.0, current_state.velocity.y), FRICTION * delta)
 				
 			# deactivate boost if player is falling
-			if new_state.state == PlayerStatus.Boost && (new_state.velocity.y > 0):
+			if new_state.state == PlayerStatus.Boost && (new_state.velocity.y > 0 || is_on_floor()):
 				new_state.state = PlayerStatus.Idle
 			new_state.velocity = new_state.velocity + GRAVITY
 	return new_state
